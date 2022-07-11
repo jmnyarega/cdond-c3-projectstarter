@@ -42,7 +42,11 @@ jobs:
     <<: *node-image
     steps:
       - checkout
-      - run: cd frontend && npm install &&  npm run build
+      - run:
+          command: |
+            cd frontend
+            npm install
+            npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -51,7 +55,11 @@ jobs:
     <<: *node-image
     steps:
       - checkout
-      - run: cd backend && npm install &&  npm run build
+      - run:
+          command: |
+            cd backend
+            npm install
+            npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -62,7 +70,12 @@ jobs:
       - checkout
       - restore_cache:
           key: frontend-build
-      - run: cd frontend && npm install && npm run test
+      - run:
+          name:
+          command: |
+            cd frontend
+            npm install
+            npm run test
                 
   test-backend:
     <<: *node-image
@@ -70,53 +83,67 @@ jobs:
       - checkout
       - restore_cache:
           key: backend-build
-      - run: cd backend && npm install && npm run test
+      - run:
+          name: test backend
+          command: |
+            cd backend
+            npm install
+            npm run test
             
   scan-frontend:
     <<: *node-image
     steps:
       - checkout
-      - run: cd frontend && npm install && npm audit || exit 0
+      - run:
+          name: Scan Frontend
+          command: |
+            cd frontend
+            npm install
+            npm audit fix --audit-level=critical
 
   scan-backend:
     <<: *node-image
     steps:
       - checkout
-      - run: cd backend && npm install && npm audit || exit 0
+      - run:
+          name: Scan Backend
+          command: |
+            cd backend
+            npm install
+            npm audit fix --audit-level=critical
 
-  #deploy-infrastructure:
-  #  docker:
-  #    # Docker image here that supports AWS CLI
-  #  steps:
-  #    # Checkout code from git
-  #    - run:
-  #        name: Ensure back-end infrastructure exists
-  #        command: |
-  #          aws cloudformation deploy \
-  #            --template-file .circleci/files/backend.yml \
-  #            #--tags project=your-tag \
-  #            # --stack-name "your back-end stack name with workflow id" \
-  #            # --parameter-overrides ID="your workflow id"  
-  #            exit 1
-  #    - run:
-  #        name: Ensure front-end infrastructure exist
-  #        command: |
-  #          aws cloudformation deploy \
-  #            --template-file .circleci/files/frontend.yml \
-  #            #--tags project=your-tag \
-  #            # --stack-name "your front-end stack name with workflow id" \
-  #            # --parameter-overrides ID="your workflow id"  
-  #            exit 1
-  #    - run:
-  #        name: Add back-end ip to ansible inventory
-  #        command: |
-  #          # Your code here
-  #          exit 1
-  #    - persist_to_workspace:
-  #        root: ~/
-  #        paths:
-  #          - project/.circleci/ansible/inventory.txt
-  #    # Here's where you will add some code to rollback on failure      
+
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=udacity-backend \
+              --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+              --parameter-overrides ID="your workflow id" # no idea what is this ??
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=your-tag \
+              --stack-name "your front-end stack name with workflow id" \
+              --parameter-overrides ID="your workflow id"  
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            exit 0
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+
+      # Here's where you will add some code to rollback on failure      
 
   #configure-infrastructure:
   #  docker:
