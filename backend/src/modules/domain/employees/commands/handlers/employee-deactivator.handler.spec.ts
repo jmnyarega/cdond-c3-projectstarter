@@ -20,10 +20,13 @@ describe('Employee Remover', () => {
 
       const params = {
         employeeId: 100,
-        isActive: false
+        isActive: false,
       };
 
-      const deactivateEmployeeCommand = new DeactivateEmployee(params.employeeId, params.isActive);
+      const deactivateEmployeeCommand = new DeactivateEmployee(
+        params.employeeId,
+        params.isActive,
+      );
 
       // Act
       await handler.handle(deactivateEmployeeCommand);
