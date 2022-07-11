@@ -51,42 +51,43 @@ jobs:
     <<: *node-image
     steps:
       - checkout
-      - run: cd frontend && npm install &&  npm run build
+      - run: cd backend && npm install &&  npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
 
-  test-frontend:
-    <<: *node-image
-    steps:
-      - checkout
-      - restore_cache:
-          key: frontend-build
-      - run: cd frontend && npm run test
+#   test-frontend:
+#     <<: *node-image
+#     steps:
+#       - checkout
+#       - restore_cache:
+#           key: frontend-build
+#       - run: cd frontend && npm run test
                 
-  test-backend:
-    <<: *node-image
-    steps:
-      - checkout
-      - restore_cache:
-          key: backend-build
-      - run: cd backend && npm run test
+#   test-backend:
+#     <<: *node-image
+#     steps:
+#       - checkout
+#       - run: cd frontend && npm install &&  npm run test
+      # - restore_cache:
+          # key: backend-build
+      # - run: cd backend && npm run test
             
-  scan-frontend:
-    <<: *node-image
-    steps:
-      - checkout
-      - restore_cache:
-          key: frontend-build
-      - run: cd frontend && npm run lint
+  # scan-frontend:
+  #   <<: *node-image
+  #   steps:
+  #     - checkout
+  #     - restore_cache:
+  #         key: frontend-build
+  #     - run: cd frontend && npm run lint
 
-  scan-backend:
-    <<: *node-image
-    steps:
-      - checkout
-      - restore_cache:
-          key: backend-build
-      - run: cd backend && npm run lint
+  # scan-backend:
+  #   <<: *node-image
+  #   steps:
+  #     - checkout
+  #     - restore_cache:
+  #         key: backend-build
+  #     - run: cd backend && npm run lint
 
   #deploy-infrastructure:
   #  docker:
