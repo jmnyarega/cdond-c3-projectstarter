@@ -5,18 +5,18 @@ defaults: &node-image
     - image: circleci/node:13.8.0
 
 
-# commands:
-  # destroy-environment:
-  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-  #   parameters:
-  #     # Add parameter here   
-  #   steps:
-  #     - run:
-  #         name: Destroy environments
-  #         when: on_fail
-  #         command: |
-  #           # Your code here
-  #           exit 1
+commands:
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      stackname: 
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: aws cloudformation delete-stack --stack-name << parameters.stackname >>
 
   # revert-migrations:
   #   description: Revert the last migration if successfully run in the current workflow.
@@ -149,8 +149,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-
-      # Here's where you will add some code to rollback on failure      
+      - destroy-environment
 
   #configure-infrastructure:
   #  docker:
