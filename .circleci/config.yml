@@ -143,7 +143,7 @@ jobs:
           command: |
             echo [ubuntu] > inventory.txt &&
             aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \ # use tag to filter out the backend IP
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text >> inventory.txt && cat inventory.txt
       - persist_to_workspace:
           root: ~/
@@ -156,7 +156,8 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - fingureprints: [ "03:d9:56:83:f5:02:fc:de:e8:56:56:36:20:60:fc:58" ]
+      - add_ssh_keys: 
+          fingureprints: [ "03:d9:56:83:f5:02:fc:de:e8:56:56:36:20:60:fc:58" ]
       - attach_workspace:
           at: .
       - run:
@@ -172,12 +173,15 @@ jobs:
           command: |
             apk add --update --no-cache ansible
       - run:
+          name: Install aws-cli
+          command: |
+            apk add --no-cache py3-pip \
+                && pip3 install --upgrade pip \
+                && pip3 install --no-cache-dir awscli
+      - run:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt ansible/main.yml --key-file ~/.ssh/id_rsa_03d95683f502fcdee85656362060fc58
-
-      - image: amazon/aws-cli
-      - destroy-environment
 
   #run-migrations:
   #  docker:
@@ -310,9 +314,8 @@ workflows:
           filters:
             branches:
               only: [master]
-              # only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
