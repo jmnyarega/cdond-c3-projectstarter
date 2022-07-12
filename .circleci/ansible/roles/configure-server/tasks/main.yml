@@ -21,24 +21,20 @@
     state: latest
     update_cache: yes
 
-- name: install pm2
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
-
 - name: create web directory
   file:
-    path: ~/web
+    path: ~/application/backend
     state: directory
 
 - name: copy files
   copy:
-    src: files/index.js
-    dest: ~/web/index.js
+    src: ../../../../../backend
+    dest: ~/application/backend
+
+- name: Install dependencies
+  shell: |
+    npm install
 
 - name: Start web server
   shell: |
-    pm2 start ~/web/index.js -f
+    npm run start
